@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Расписание</title>
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { getDatabase, ref, get, set, update, onValue } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+
+    // ✅ ТВОЙ Firebase config — вставь свои данные
+    const firebaseConfig = {
+  apiKey: "AIzaSyAs8TUQfQwwTg9OPc2eSmGUKlFfANHTmP8",
+  authDomain: "schedule-calendar-f6e90.firebaseapp.com",
+  projectId: "schedule-calendar-f6e90",
+  storageBucket: "schedule-calendar-f6e90.firebasestorage.app",
+  messagingSenderId: "1057783574423",
+  appId: "1:1057783574423:web:d38318e4eabe51e92e9ed2"
+};
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // Передаём базу в window, чтобы script.js её видел
+    window.firebaseDB = db;
+    window.firebaseRef = ref;
+    window.firebaseGet = get;
+    window.firebaseSet = set;
+    window.firebaseUpdate = update;
+    window.firebaseOnValue = onValue;
+  </script>
+</head>
+<body>
+  <h1>Расписание</h1>
+
+  <h2>Зал 1</h2>
+  <div id="schedule-container-1"></div>
+
+  <h2>Зал 2</h2>
+  <div id="schedule-container-2"></div>
+
+  <script src="script.js" type="module"></script>
+</body>
+</html>
