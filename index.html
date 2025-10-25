@@ -29,6 +29,21 @@
 
 <body>
   <h1>Расписание</h1>
+<div id="update-notice" style="
+  margin-top: 6px;
+  background: rgba(0, 224, 255, 0.08);
+  color: #8affff;
+  border: 1px solid rgba(0, 224, 255, 0.3);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 14px;
+  font-family: Inter, sans-serif;
+  width: fit-content;
+  box-shadow: 0 0 6px rgba(0,224,255,0.1);
+">
+  🔄 Загрузка расписания...
+</div>
+
 
   <h2>Зал 1</h2>
   <div id="schedule-container-1"></div>
@@ -36,7 +51,11 @@
   <h2>Зал 2</h2>
   <div id="schedule-container-2"></div>
 
-  <script src="script.js"></script>
 
+  <script src="mandatory.js"></script>
+  <script type="module" src="script.js"></script>
 </body>
+
+
+
 </html>
