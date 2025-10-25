@@ -51,65 +51,29 @@ function initSchedule(){
   return sched;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // 🔹 Загрузка данных из Firebase
 async function loadSchedules(){
   scheduleHalls[1]=initSchedule();
   scheduleHalls[2]=initSchedule();
   weekDates=getNext30Days();
 
-  const occupiedSnap = await firebase.database().ref('calendar/occupied').get();
-  const occupied = occupiedSnap.val() || {};
+  const occupiedSnap=await firebase.database().ref('calendar/occupied').get();
+  const mandatorySnap=await firebase.database().ref('calendar/mandatory').get();
+  const occupied=occupiedSnap.val()||{};
+  const mandatoryList=mandatorySnap.val()||[];
 
-  // 🔹 Используем локальные mandatory из файла mandatory.js
-  const mandatoryList = window.localMandatory || [];
-
-
-   // Применяем occupied — теперь строго по дате (надёжно)
-[1, 2].forEach(hall => {
-  (occupied[hall] || []).forEach(item => {
-    const itemDate = new Date(item.day);
-    if (isNaN(itemDate)) {
-      console.warn('❗ Неверная дата в occupied:', item.day);
-      return;
-    }
-
-    // Берём первый день текущего окна (пн)
-    const windowStartDate = new Date(weekDates[0].date);
-    const msPerDay = 24 * 60 * 60 * 1000;
-
-    // Сравниваем только даты без учёта времени
-    const itemMidnight = new Date(itemDate.getFullYear(), itemDate.getMonth(), itemDate.getDate());
-    const windowStartMidnight = new Date(windowStartDate.getFullYear(), windowStartDate.getMonth(), windowStartDate.getDate());
-
-    // Разница в днях между началом недели и нужной датой
-    const dayIndex = Math.round((itemMidnight - windowStartMidnight) / msPerDay);
-
-    if (dayIndex >= 0 && dayIndex < weekDates.length) {
-      const t = teachers.find(t => t.name === item.teacher);
-      if (t) {
-        scheduleHalls[hall][item.time][dayIndex] = { type: 'occupied', teacher: { ...t, color: occupiedColor } };
-      } else {
-        scheduleHalls[hall][item.time][dayIndex] = { type: 'occupied', teacher: { name: item.teacher, color: occupiedColor } };
+  // Применяем occupied
+  [1,2].forEach(hall=>{
+    (occupied[hall]||[]).forEach(item=>{
+      const dayIndex=weekDates.findIndex(d=>d.key===item.day);
+      if(dayIndex>=0){
+        const t=teachers.find(t=>t.name===item.teacher);
+        if(t){
+          scheduleHalls[hall][item.time][dayIndex]={type:'occupied',teacher:{...t,color:occupiedColor}};
+        }
       }
-    }
+    });
   });
-});
-
-
 
   // Применяем mandatory
   const dayMap={вс:0,пн:1,вт:2,ср:3,чт:4,пт:5,сб:6};
@@ -132,15 +96,6 @@ async function loadSchedules(){
   });
 }
 
-
-
-
-
-
-
-
-
-
 // 🔹 Обновление ячейки в Firebase
 async function updateCellInFirebase(hall, day, time, teacherName){
   const ref=firebase.database().ref(`calendar/occupied/${hall}`);
@@ -150,16 +105,6 @@ async function updateCellInFirebase(hall, day, time, teacherName){
   if(teacherName) data.push({day,time,teacher:teacherName});
   await ref.set(data);
 }
-
-
-
-
-
-
-
-
-
-
 
 // 🔹 Подписка на обновления Firebase
 function initRealtimeUpdates(){
@@ -174,41 +119,15 @@ function initRealtimeUpdates(){
           }
         }
       });
-            (occupied[hall] || []).forEach(item => {
-  const itemDate = new Date(item.day);
-  if (isNaN(itemDate)) {
-    console.warn('❗ Неверная дата в occupied:', item.day);
-    return;
-  }
-
-  // Первый день текущего окна (понедельник)
-  const windowStartDate = new Date(weekDates[0].date);
-  const msPerDay = 24 * 60 * 60 * 1000;
-
-  // Сравниваем только даты, без времени и таймзоны
-  const itemMidnight = new Date(itemDate.getFullYear(), itemDate.getMonth(), itemDate.getDate());
-  const windowStartMidnight = new Date(windowStartDate.getFullYear(), windowStartDate.getMonth(), windowStartDate.getDate());
-
-  // Разница в днях между датой элемента и началом недели
-  const dayIndex = Math.round((itemMidnight - windowStartMidnight) / msPerDay);
-
-  if (dayIndex >= 0 && dayIndex < weekDates.length) {
-    const t = teachers.find(t => t.name === item.teacher);
-    if (t) {
-      scheduleHalls[hall][item.time][dayIndex] = {
-        type: 'occupied',
-        teacher: { ...t, color: occupiedColor }
-      };
-    } else {
-      scheduleHalls[hall][item.time][dayIndex] = {
-        type: 'occupied',
-        teacher: { name: item.teacher, color: occupiedColor }
-      };
-    }
-  }
-});
-
-
+      (occupied[hall]||[]).forEach(item=>{
+        const dayIndex=weekDates.findIndex(d=>d.key===item.day);
+        if(dayIndex>=0){
+          const t=teachers.find(t=>t.name===item.teacher);
+          if(t){
+            scheduleHalls[hall][item.time][dayIndex]={type:'occupied',teacher:{...t,color:occupiedColor}};
+          }
+        }
+      });
       renderHall(hall,'schedule-container-'+hall);
     });
   });
@@ -366,67 +285,7 @@ async function initAll(){
   await loadSchedules();
   initRealtimeUpdates();
   [1,2].forEach(hall=>renderHall(hall,'schedule-container-'+hall));
-  showUpdateNotice(); // 🔹 показать время загрузки при старте
 }
-
 
 // 🔹 Запуск
 document.addEventListener('DOMContentLoaded',initAll);
-
-
-
-
-
-
-
-
-
-
-
-// 🔹 Обновление расписания полностью
-async function reloadAll() {
-  console.log("♻️ Перезагрузка расписания (новый день)");
-  scheduleHalls = {1:{}, 2:{}}; 
-  weekDates = getNext30Days();  
-  await loadSchedules();        
-  [1, 2].forEach(hall => renderHall(hall, 'schedule-container-' + hall));
-  showUpdateNotice(); // 🔹 обновляем дату в панели
-}
-
-
-
-// 🔹 Проверка смены дня — чтобы расписание обновлялось автоматически
-let currentDateKey = dateKey(new Date()); // теперь текущая дата при старте
-
-setInterval(async () => {
-  const todayKey = dateKey(new Date());
-  if (todayKey !== currentDateKey) {
-    console.log(`📅 День сменился: ${currentDateKey} → ${todayKey}`);
-    currentDateKey = todayKey;
-    await reloadAll(); // перерисовываем всё, включая occupied
-  }
-}, 60 * 1000); // проверяем каждые 60 секунд
-
-
-
-
-
-
-
-
-function showUpdateNotice() {
-  const div = document.getElementById('update-notice');
-  if (!div) return;
-  
-  const now = new Date();
-  const formatted = now.toLocaleString('ru-RU', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  });
-
-  div.textContent = `🟢 Последнее обновление: ${formatted}`;
-}
-
