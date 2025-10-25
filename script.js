@@ -236,21 +236,31 @@ function renderHall(hall,containerId){
   dateTh.style.color='#39d3d6';
   weekHeader.appendChild(dateTh);
 
-  let start=0;
-  while(start<weekDates.length){
-    const startDay=weekDates[start].date;
-    const startDow=startDay.getDay();
-    const daysLeftInWeek=(7-((startDow+6)%7+1));
-    const end=Math.min(start+daysLeftInWeek+1,weekDates.length);
-    const startDate=weekDates[start].dayStr;
-    const endDate=weekDates[end-1].dayStr;
-    const th=document.createElement('th');
-    th.colSpan=end-start;
-    th.textContent=`с ${startDate} по ${endDate}`;
-    th.style.color='#39d3d6';
+    let start = 0;
+  while (start < weekDates.length) {
+    const startDay = weekDates[start].date;
+    const startDow = startDay.getDay();
+    const daysLeftInWeek = (7 - ((startDow + 6) % 7 + 1));
+    const end = Math.min(start + daysLeftInWeek + 1, weekDates.length);
+
+    const startDate = weekDates[start].dayStr;
+    const endDate = weekDates[end - 1].dayStr;
+
+    const th = document.createElement('th');
+    th.colSpan = end - start;
+    th.style.color = '#39d3d6';
+
+    // ✅ если неделя из одного дня — просто дата, иначе "с ... по ..."
+    if (startDate === endDate) {
+      th.textContent = startDate;
+    } else {
+      th.textContent = `с ${startDate} по ${endDate}`;
+    }
+
     weekHeader.appendChild(th);
-    start=end;
+    start = end;
   }
+
   table.appendChild(weekHeader);
 
   const head=document.createElement('tr');
