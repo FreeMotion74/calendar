@@ -21,7 +21,13 @@ let scheduleHalls = {1:{},2:{}};
 let weekDates = [];
 
 // 🔹 Формат даты
-function dateKey(d){ return d.toISOString().split('T')[0]; }
+function dateKey(d){
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`; // локальная дата
+}
+
 
 // 🔹 Следующие 30 дней
 function getNext30Days(){
@@ -57,23 +63,31 @@ async function loadSchedules(){
   scheduleHalls[2]=initSchedule();
   weekDates=getNext30Days();
 
-  const occupiedSnap=await firebase.database().ref('calendar/occupied').get();
-  const mandatorySnap=await firebase.database().ref('calendar/mandatory').get();
-  const occupied=occupiedSnap.val()||{};
-  const mandatoryList=mandatorySnap.val()||[];
+  const occupiedSnap = await firebase.database().ref('calendar/occupied').get();
+  const occupied = occupiedSnap.val() || {};
 
-  // Применяем occupied
-  [1,2].forEach(hall=>{
-    (occupied[hall]||[]).forEach(item=>{
-      const dayIndex=weekDates.findIndex(d=>d.key===item.day);
-      if(dayIndex>=0){
-        const t=teachers.find(t=>t.name===item.teacher);
-        if(t){
-          scheduleHalls[hall][item.time][dayIndex]={type:'occupied',teacher:{...t,color:occupiedColor}};
-        }
-      }
-    });
+  // 🔹 Используем локальные mandatory из файла mandatory.js
+  const mandatoryList = window.localMandatory || [];
+
+// 🔹 Применяем occupied
+[1,2].forEach(hall => {
+  const hallOccupied = occupied[hall] || [];
+  hallOccupied.forEach(item => {
+    const dayIndex = weekDates.findIndex(d => d.key === item.day);
+    if (dayIndex === -1) return;
+
+    const t = teachers.find(t => t.name === item.teacher);
+    if (!t) return;
+
+    scheduleHalls[hall][item.time][dayIndex] = {
+      type: 'occupied',
+      teacher: { ...t, color: occupiedColor }
+    };
   });
+});
+
+
+
 
   // Применяем mandatory
   const dayMap={вс:0,пн:1,вт:2,ср:3,чт:4,пт:5,сб:6};
