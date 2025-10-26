@@ -148,78 +148,194 @@ function initRealtimeUpdates(){
   });
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // 🔹 Клик по ячейке
-async function onCellClick(td,hall,time,dayIndex){
-  const slot=scheduleHalls[hall][time][dayIndex];
-  if(slot.type==='mandatory') return;
+async function onCellClick(td, hall, time, dayIndex) {
+  const slot = scheduleHalls[hall][time][dayIndex];
+  if (slot.type === 'mandatory') return;
 
-  const existingPopup=document.getElementById('teacher-popup');
-  if(existingPopup) existingPopup.remove();
+  const existingPopup = document.getElementById('teacher-popup');
+  if (existingPopup && existingPopup.dataset.cell === `${hall}-${time}-${dayIndex}`) {
+    await closePopupSmooth(existingPopup); // плавное закрытие
+    return;
+  }
+  if (existingPopup) await closePopupSmooth(existingPopup); // плавное закрытие перед открытием нового
 
-  // Удаление занятия
-  if(slot.type==='occupied'){
-    if(confirm(`Удалить занятие "${slot.teacher.name}" на ${weekDates[dayIndex].dayStr} ${time} в зале ${hall}?`)){
-      scheduleHalls[hall][time][dayIndex]={type:'free',teacher:null};
-      renderHall(hall,'schedule-container-'+hall);
-      await updateCellInFirebase(hall,weekDates[dayIndex].key,time,null);
+  // 🔹 Удаление занятия
+  if (slot.type === 'occupied') {
+    if (confirm(`Удалить занятие "${slot.teacher.name}" на ${weekDates[dayIndex].dayStr} ${time} в зале ${hall}?`)) {
+      scheduleHalls[hall][time][dayIndex] = { type: 'free', teacher: null };
+      renderHall(hall, 'schedule-container-' + hall);
+      await updateCellInFirebase(hall, weekDates[dayIndex].key, time, null);
     }
     return;
   }
 
-  // Popup выбора преподавателя
-  const popup=document.createElement('div');
-  popup.id='teacher-popup';
-  popup.style.position='absolute';
-  popup.style.color='#fff';
-  popup.style.background='#0b2030';
-  popup.style.border='1px solid #ccc';
-  popup.style.borderRadius='8px';
-  popup.style.padding='8px';
-  popup.style.minWidth='100px';
-  popup.style.zIndex=1000;
+  // 🔹 Создание popup
+  const popup = document.createElement('div');
+  popup.id = 'teacher-popup';
+  popup.dataset.cell = `${hall}-${time}-${dayIndex}`;
+  popup.style.position = 'absolute';
+  popup.style.background = 'rgba(15, 30, 45, 0.96)';
+  popup.style.backdropFilter = 'blur(6px)';
+  popup.style.border = '1px solid rgba(255,255,255,0.08)';
+  popup.style.borderRadius = '12px';
+  popup.style.padding = '10px';
+  popup.style.minWidth = '140px';
+  popup.style.textAlign = 'center';
+  popup.style.zIndex = 1000;
+  popup.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.3)';
+  popup.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
+  popup.style.opacity = '0';
+  popup.style.transform = 'translateY(8px)';
 
-  const rect=td.getBoundingClientRect();
-  popup.style.left=rect.left+window.scrollX+'px';
-  popup.style.top=rect.bottom+window.scrollY+'px';
+  const rect = td.getBoundingClientRect();
+  const popupWidth = 160;
+  let left = rect.left + window.scrollX + rect.width / 2 - popupWidth / 2;
+  const top = rect.bottom + window.scrollY + 8;
 
-  const title=document.createElement('div');
-  title.textContent='Выбери имя:';
-  title.style.marginBottom='6px';
-  title.style.fontWeight='600';
-  popup.appendChild(title);
+  const maxRight = window.scrollX + window.innerWidth - popupWidth - 8;
+  if (left < 8) left = 8;
+  if (left > maxRight) left = maxRight;
 
-  teachers.forEach(t=>{
-    const btn=document.createElement('button');
-    btn.textContent=t.name;
-    btn.style.display='block';
-    btn.style.width='100%';
-    btn.style.margin='2px 0';
-    btn.style.padding='6px';
-    btn.style.border='none';
-    btn.style.borderRadius='4px';
-    btn.style.color='#fff';
-    btn.style.cursor='pointer';
-    btn.style.background=t.color+'33';
-    btn.onmouseover=()=>btn.style.background=t.color;
-    btn.onmouseout=()=>btn.style.background=t.color+'33';
-    btn.onclick=async()=>{
-      scheduleHalls[hall][time][dayIndex]={type:'occupied',teacher:{...t,color:occupiedColor}};
-      document.body.removeChild(popup);
-      renderHall(hall,'schedule-container-'+hall);
-      await updateCellInFirebase(hall,weekDates[dayIndex].key,time,t.name);
+  popup.style.left = `${left}px`;
+  popup.style.top = `${top}px`;
+
+  requestAnimationFrame(() => {
+    popup.style.opacity = '1';
+    popup.style.transform = 'translateY(0)';
+  });
+
+  // 🔹 Дата и время
+  const info = document.createElement('div');
+  info.innerHTML = `
+    <div style="font-size:17px; margin-bottom:4px; color:#c9d1d9;">
+      <strong>Дата:</strong> ${weekDates[dayIndex].dayStr}
+    </div>
+    <div style="font-size:17px; margin-bottom:8px; color:#c9d1d9;">
+      <strong>Время:</strong> ${time}
+    </div>
+  `;
+  popup.appendChild(info);
+
+  // 🔹 Кнопки преподавателей
+  teachers.forEach(t => {
+    const btn = document.createElement('button');
+    btn.textContent = t.name;
+    btn.style.display = 'block';
+    btn.style.width = '100%';
+    btn.style.margin = '3px 0';
+    btn.style.padding = '7px 6px';
+    btn.style.border = 'none';
+    btn.style.borderRadius = '6px';
+    btn.style.color = '#fff';
+    btn.style.cursor = 'pointer';
+    btn.style.fontSize = '16px';
+    btn.style.transition = 'background 0.15s ease, color 0.15s ease';
+    btn.style.background = t.color + '50';
+    btn.onmouseover = () => (btn.style.background = t.color);
+    btn.onmouseout = () => (btn.style.background = t.color + '22');
+
+    btn.onclick = async () => {
+      await closePopupSmooth(popup);
+      scheduleHalls[hall][time][dayIndex] = { type: 'occupied', teacher: { ...t, color: occupiedColor } };
+      renderHall(hall, 'schedule-container-' + hall);
+      await updateCellInFirebase(hall, weekDates[dayIndex].key, time, t.name);
     };
     popup.appendChild(btn);
   });
 
-  document.body.appendChild(popup);
-  const closePopup=(e)=>{
-    if(!popup.contains(e.target)){
-      popup.remove();
-      document.removeEventListener('click',closePopup);
-    }
+  // 🔹 Кнопка "Отмена"
+  const cancelBtn = document.createElement('button');
+  cancelBtn.textContent = 'Отмена';
+  cancelBtn.style.display = 'block';
+  cancelBtn.style.width = '100%';
+  cancelBtn.style.marginTop = '8px';
+  cancelBtn.style.padding = '7px';
+  cancelBtn.style.border = 'none';
+  cancelBtn.style.borderRadius = '6px';
+  cancelBtn.style.color = '#bbb';
+  cancelBtn.style.background = 'rgba(255,255,255,0.07)';
+  cancelBtn.style.cursor = 'pointer';
+  cancelBtn.style.fontSize = '13px';
+  cancelBtn.style.transition = 'background 0.15s ease, color 0.15s ease';
+  cancelBtn.onmouseover = () => {
+    cancelBtn.style.background = 'rgba(255,255,255,0.12)';
+    cancelBtn.style.color = '#fff';
   };
-  setTimeout(()=>document.addEventListener('click',closePopup),10);
+  cancelBtn.onmouseout = () => {
+    cancelBtn.style.background = 'rgba(255,255,255,0.07)';
+    cancelBtn.style.color = '#bbb';
+  };
+  cancelBtn.onclick = () => closePopupSmooth(popup);
+  popup.appendChild(cancelBtn);
+
+  document.body.appendChild(popup);
+
+  // 🔹 Закрытие по клику вне popup
+  const closePopup = (e) => {
+    if (!popup.contains(e.target)) closePopupSmooth(popup);
+  };
+  setTimeout(() => document.addEventListener('click', closePopup), 10);
 }
+
+// 🔹 Плавное закрытие popup
+async function closePopupSmooth(popup) {
+  popup.style.opacity = '0';
+  popup.style.transform = 'translateY(8px)';
+  await new Promise(res => setTimeout(res, 200));
+  popup.remove();
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // 🔹 Рендер расписания
 function renderHall(hall,containerId){
