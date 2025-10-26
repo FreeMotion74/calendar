@@ -1,36 +1,42 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Расписание</title>
-	<link rel="icon" href="favicon.png">
-    <link rel="stylesheet" href="style.css">
-    <meta name="theme-color" content="#0a0f1f">
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyC6Bx7TqwJKDVikvsS-6cvZOUWHC_KQsNs",
-            authDomain: "calendar-5039c.firebaseapp.com",
-            databaseURL: "https://calendar-5039c-default-rtdb.europe-west1.firebasedatabase.app",
-            projectId: "calendar-5039c",
-            storageBucket: "calendar-5039c.firebasestorage.app",
-            messagingSenderId: "497955603175",
-            appId: "1:497955603175:web:54c6ce88d62b3072a6d842"
-        };
-        firebase.initializeApp(firebaseConfig);
-    </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Расписание</title>
+  <link rel="stylesheet" href="style.css">
+
+  <!-- ✅ Старая стабильная версия Firebase, работает без модулей -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+  <script>
+    // 🔹 ВСТАВЬ СВОИ ДАННЫЕ Firebase (из консоли)
+    const firebaseConfig = {
+  apiKey: "AIzaSyC6Bx7TqwJKDVikvsS-6cvZOUWHC_KQsNs",
+  authDomain: "calendar-5039c.firebaseapp.com",
+  databaseURL: "https://calendar-5039c-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "calendar-5039c",
+  storageBucket: "calendar-5039c.firebasestorage.app",
+  messagingSenderId: "497955603175",
+  appId: "1:497955603175:web:54c6ce88d62b3072a6d842"
+};
+
+    // 🔹 Инициализация Firebase
+    firebase.initializeApp(firebaseConfig);
+  </script>
 </head>
+
 <body>
-    <noscript>Для запуска этого приложения вам необходимо включить JavaScript.</noscript>
-    <h1>Расписание</h1>
-    <h2>Зал 1</h2>
-    <div id="schedule-container-1"></div>
-    <h2>Зал 2</h2>
-    <div id="schedule-container-2"></div>
-    <script src="mandatory.js"></script>
-    <script type="module" src="script.js?v=1.3"></script>
+  <h1>Расписание</h1>
+
+  <h2>Зал 1</h2>
+  <div id="schedule-container-1"></div>
+
+  <h2>Зал 2</h2>
+  <div id="schedule-container-2"></div>
+
+  <script src="mandatory.js"></script>
+  <script type="module" src="script.js?v=1.2"></script>
 </body>
 </html>
-
