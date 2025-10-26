@@ -162,19 +162,32 @@ function initRealtimeUpdates(){
 
 
 
-// 🔹 Клик по ячейке
+// глобальные переменные (как у тебя выше)
+let activeTd = null; // текущая подсвеченная ячейка
+let closePopupHandler = null; // слушатель клика вне popup
+
+// Полный onCellClick — заменяй им старый
 async function onCellClick(td, hall, time, dayIndex) {
   const slot = scheduleHalls[hall][time][dayIndex];
   if (slot.type === 'mandatory') return;
 
+  // Если popup уже открыт на той же ячейке → закрываем
   const existingPopup = document.getElementById('teacher-popup');
   if (existingPopup && existingPopup.dataset.cell === `${hall}-${time}-${dayIndex}`) {
-    await closePopupSmooth(existingPopup); // плавное закрытие
+    await closePopupSmooth(existingPopup);
+    if (activeTd) activeTd.classList.remove('cell-active');
+    activeTd = null;
     return;
   }
-  if (existingPopup) await closePopupSmooth(existingPopup); // плавное закрытие перед открытием нового
 
-  // 🔹 Удаление занятия
+  // Если был открыт другой popup → закрыть перед открытием нового
+  if (existingPopup) {
+    await closePopupSmooth(existingPopup);
+    if (activeTd) activeTd.classList.remove('cell-active');
+    activeTd = null;
+  }
+
+  // Удаление занятия (если slot занят)
   if (slot.type === 'occupied') {
     if (confirm(`Удалить занятие "${slot.teacher.name}" на ${weekDates[dayIndex].dayStr} ${time} в зале ${hall}?`)) {
       scheduleHalls[hall][time][dayIndex] = { type: 'free', teacher: null };
@@ -184,13 +197,17 @@ async function onCellClick(td, hall, time, dayIndex) {
     return;
   }
 
-  // 🔹 Создание popup
+  // Подсветка активной ячейки
+  td.classList.add('cell-active');
+  activeTd = td;
+
+  // Создаём popup
   const popup = document.createElement('div');
   popup.id = 'teacher-popup';
   popup.dataset.cell = `${hall}-${time}-${dayIndex}`;
   popup.style.position = 'absolute';
   popup.style.background = 'rgba(15, 30, 45, 0.96)';
-  popup.style.backdropFilter = 'blur(6px)';
+  popup.style.backdropFilter = 'blur(5px)';
   popup.style.border = '1px solid rgba(255,255,255,0.08)';
   popup.style.borderRadius = '12px';
   popup.style.padding = '10px';
@@ -198,28 +215,21 @@ async function onCellClick(td, hall, time, dayIndex) {
   popup.style.textAlign = 'center';
   popup.style.zIndex = 1000;
   popup.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.3)';
-  popup.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
-  popup.style.opacity = '0';
-  popup.style.transform = 'translateY(8px)';
+  // плавность — короткая, см. requestAnimationFrame ниже
+  popup.style.transition = 'opacity 0.08s ease-out, transform 0.08s ease-out';
 
+  // Позиционируем popup
   const rect = td.getBoundingClientRect();
   const popupWidth = 160;
   let left = rect.left + window.scrollX + rect.width / 2 - popupWidth / 2;
   const top = rect.bottom + window.scrollY + 8;
-
   const maxRight = window.scrollX + window.innerWidth - popupWidth - 8;
   if (left < 8) left = 8;
   if (left > maxRight) left = maxRight;
-
   popup.style.left = `${left}px`;
   popup.style.top = `${top}px`;
 
-  requestAnimationFrame(() => {
-    popup.style.opacity = '1';
-    popup.style.transform = 'translateY(0)';
-  });
-
-  // 🔹 Дата и время
+  // Содержимое (дата/время)
   const info = document.createElement('div');
   info.innerHTML = `
     <div style="font-size:17px; margin-bottom:4px; color:#c9d1d9;">
@@ -231,7 +241,7 @@ async function onCellClick(td, hall, time, dayIndex) {
   `;
   popup.appendChild(info);
 
-  // 🔹 Кнопки преподавателей
+  // Кнопки преподавателей
   teachers.forEach(t => {
     const btn = document.createElement('button');
     btn.textContent = t.name;
@@ -250,6 +260,7 @@ async function onCellClick(td, hall, time, dayIndex) {
     btn.onmouseout = () => (btn.style.background = t.color + '22');
 
     btn.onclick = async () => {
+      if (activeTd) activeTd.classList.remove('cell-active');
       await closePopupSmooth(popup);
       scheduleHalls[hall][time][dayIndex] = { type: 'occupied', teacher: { ...t, color: occupiedColor } };
       renderHall(hall, 'schedule-container-' + hall);
@@ -258,7 +269,7 @@ async function onCellClick(td, hall, time, dayIndex) {
     popup.appendChild(btn);
   });
 
-  // 🔹 Кнопка "Отмена"
+  // Кнопка отмены
   const cancelBtn = document.createElement('button');
   cancelBtn.textContent = 'Отмена';
   cancelBtn.style.display = 'block';
@@ -280,25 +291,67 @@ async function onCellClick(td, hall, time, dayIndex) {
     cancelBtn.style.background = 'rgba(255,255,255,0.07)';
     cancelBtn.style.color = '#bbb';
   };
-  cancelBtn.onclick = () => closePopupSmooth(popup);
+  cancelBtn.onclick = async () => {
+    if (activeTd) activeTd.classList.remove('cell-active');
+    activeTd = null;
+    await closePopupSmooth(popup);
+  };
   popup.appendChild(cancelBtn);
+
+  // Начальное состояние перед анимацией — мгновенное вставление в DOM
+  popup.style.opacity = '0';
+  popup.style.transform = 'translateY(2px)';
 
   document.body.appendChild(popup);
 
-  // 🔹 Закрытие по клику вне popup
-  const closePopup = (e) => {
-    if (!popup.contains(e.target)) closePopupSmooth(popup);
+  // Запуск плавного появления в следующем кадре — моментальный отклик
+  requestAnimationFrame(() => {
+    popup.style.opacity = '1';
+    popup.style.transform = 'translateY(0)';
+  });
+
+  // Закрытие по клику вне popup — регистрируем обработчик
+  if (closePopupHandler) document.removeEventListener('click', closePopupHandler);
+  closePopupHandler = (e) => {
+    if (!popup.contains(e.target)) {
+      if (activeTd) activeTd.classList.remove('cell-active');
+      activeTd = null;
+      closePopupSmooth(popup);
+      document.removeEventListener('click', closePopupHandler);
+      closePopupHandler = null;
+    }
   };
-  setTimeout(() => document.addEventListener('click', closePopup), 10);
+  // даём браузеру миллисекунду чтобы не поймать этот же клик
+  setTimeout(() => document.addEventListener('click', closePopupHandler), 0);
 }
 
-// 🔹 Плавное закрытие popup
+// Плавное закрытие popup — принимает сам popup-элемент
 async function closePopupSmooth(popup) {
+  if (!popup) return;
+  // если передали id или получили по DOM
+  if (typeof popup === 'string') popup = document.getElementById(popup);
+  if (!popup || popup.style.display === 'none') {
+    // просто удалим, если он в DOM
+    if (popup && popup.parentNode) popup.remove();
+    return;
+  }
+
+  // Убираем визуально
+  popup.style.transition = 'opacity 0.08s ease-out, transform 0.08s ease-out';
   popup.style.opacity = '0';
-  popup.style.transform = 'translateY(8px)';
-  await new Promise(res => setTimeout(res, 200));
-  popup.remove();
+  popup.style.transform = 'translateY(2px)';
+
+  // Снимаем подсветку активной ячейки
+  if (activeTd) activeTd.classList.remove('cell-active');
+  activeTd = null;
+
+  // Ждём завершения анимации и удаляем
+  await new Promise(res => setTimeout(res, 80));
+  if (popup.parentNode) popup.remove();
 }
+
+
+
 
 
 
@@ -401,19 +454,38 @@ function renderHall(hall,containerId){
     tdTime.style.color='#39d3d6';
     tr.appendChild(tdTime);
     weekDates.forEach((d,i)=>{
-      const td=document.createElement('td');
-      const slot=sched[time][i];
-      td.style.cursor='pointer';
-      if(slot.type==='free'){
-        td.title='Свободно';
-        td.onclick=()=>onCellClick(td,hall,time,i);
-      }else{
-        td.textContent=slot.teacher.name;
-        td.style.backgroundColor=slot.teacher.color;
-        td.title=slot.type==='mandatory' ? slot.teacher.name : `Занято: ${slot.teacher.name}`;
-        td.onclick=()=>onCellClick(td,hall,time,i);
-      }
-      tr.appendChild(td);
+      const td = document.createElement('td');
+const slot = sched[time][i];
+
+// Сбрасываем/назначаем классы и курсор в зависимости от типа
+td.classList.remove('free','occupied','mandatory');
+
+if (slot.type === 'free') {
+  td.classList.add('free');
+  td.title = 'Свободно';
+  td.style.cursor = 'pointer';
+  td.onclick = () => onCellClick(td, hall, time, i);
+} else if (slot.type === 'occupied') {
+  td.classList.add('occupied');
+  td.textContent = slot.teacher.name;
+  td.style.backgroundColor = slot.teacher.color;
+  td.title = `Занято: ${slot.teacher.name}`;
+  td.style.cursor = 'pointer';
+  td.onclick = () => onCellClick(td, hall, time, i);
+} else if (slot.type === 'mandatory') {
+  td.classList.add('mandatory');
+  td.textContent = slot.teacher.name;
+  td.style.backgroundColor = slot.teacher.color;
+  td.title = slot.teacher.name;
+  // Тут явно ставим курсор текстом
+  td.style.cursor = 'text';
+  // Не вешаем onclick — уже обработано в onCellClick (оно сразу возвращает), 
+  // но если нужно, можно всё равно повесить
+  td.onclick = () => onCellClick(td, hall, time, i);
+}
+
+tr.appendChild(td);
+
     });
     table.appendChild(tr);
   });
