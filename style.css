@@ -86,7 +86,6 @@ td:first-child {
 
 
 
-
 /* Остальные колонки (дни) */
 th:not(:first-child),
 td:not(:first-child) {
@@ -97,27 +96,10 @@ td:not(:first-child) {
 
 
 
-
-
-
-
 .cell-active,
 .cell-active:hover {
   box-shadow: inset 0 0 0 2px #00e0ff40;
   background-color: rgba(79, 195, 247, 0.08);
   transition: background-color 0.2s ease, box-shadow 0.2s ease;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
