@@ -1,0 +1,229 @@
+header {
+    background: var(--gradient);
+    display: flex;
+    position: sticky;
+    overflow-x: auto;
+    left: 0;
+    width: 3374px;
+}
+
+header .header {
+    margin: auto;
+    padding: 10px 0;
+}
+
+header .brand {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+}
+
+header .brand img {
+    width: 85px;
+}
+
+header .titles {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+header .title {
+    font-size: var(--text26);
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+main {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    padding: 30px;
+    width: max-content;
+}
+
+.calendar {
+    background: var(--white);
+    border-radius: 50px;
+    padding: 25px;
+    border: var(--border);
+    box-shadow: var(--shadow);
+    width: 100%;
+    display: flex;
+    gap: 15px;
+    flex-direction: column;
+}
+
+.calendar p {
+    font-size: var(--text30);
+    color: var(--purple-light);
+    font-weight: 700;
+    padding-left: 15px;
+}
+
+
+table {
+    border-radius: 30px;
+    border-width: 1px;
+    border-style: solid;
+    border-color: var(--purple-light);
+    overflow: hidden;
+    border-spacing: 0px;
+    text-align: center;
+}
+
+td:first-child {
+    border-width: 1px 1px 0 0px;
+    border-style: solid;
+    border-color: var(--purple-light);
+}
+
+
+
+
+
+
+
+
+small {
+    color: var(--purple-light);
+}
+
+
+
+
+
+
+
+
+h2 {
+    text-align: left;
+    color: var(--purple-light);
+    margin-bottom: 10px;
+    padding-left: 10px;
+    font-family: "TTNorms-bold";
+    font-weight: normal;
+    font-size: 28px;
+}
+
+
+th,
+td {
+    border: 1px solid #5a205a30;
+    padding: 8px;
+    min-width: 80px;
+}
+
+
+
+
+
+
+
+
+@media (hover: hover) {
+    .free:hover {
+        background: var(--glass);
+    }
+}
+
+
+
+/* 🔹 Подпись недель — голубой фон */
+th[colspan] {
+    background: var(--glass);
+}
+
+
+/* 🔹 Левая колонка с временем */
+td:first-child {
+    font-weight: bold;
+    width: 70px;
+}
+
+/* Остальные колонки (дни) */
+th:not(:first-child),
+td:not(:first-child) {
+    width: 106px;
+    min-width: 106px;
+    max-width: 106px;
+}
+
+strong {
+    color: var(--purple-light);
+}
+
+
+.cell-active,
+.cell-active:hover {
+    box-shadow: inset 0 0 0 2px var(--purple-light);
+    background-color: var(--glass);
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+
+
+
+
+
+footer {
+    width: 3374px;
+    padding: 20px 0;
+    text-align: center;
+    color: var(--purple-light);
+    border-top: var(--border);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+@media (max-width: 768px) {
+   header {
+    background: var(--purple-light);
+   }
+    header .header {
+        margin: 0;
+        padding: 10px 60px;
+    }
+main {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px;
+    width: max-content;
+   
+}
+
+.calendar {
+    background: var(--white);
+    border-radius: 50px;
+    padding: 20px;
+    border: var(--border);
+    box-shadow: var(--shadow);
+    width: 100%;
+    display: flex;
+    gap: 15px;
+    flex-direction: column;
+}
+}
