@@ -4,7 +4,7 @@ header {
     position: sticky;
     overflow-x: auto;
     left: 0;
-    width: 3374px;
+    width: 3375px;
 }
 
 header .header {
@@ -226,4 +226,5 @@ main {
     gap: 15px;
     flex-direction: column;
 }
+
 }
