@@ -34,10 +34,6 @@ header .title {
     white-space: nowrap;
 }
 
-
-
-
-
 main {
     display: flex;
     flex-direction: column;
@@ -65,7 +61,6 @@ main {
     padding-left: 15px;
 }
 
-
 table {
     border-radius: 30px;
     border-width: 1px;
@@ -82,26 +77,9 @@ td:first-child {
     border-color: var(--purple-light);
 }
 
-
-
-
-
-
 small {
     color: var(--purple-light);
 }
-
-
-h2 {
-    text-align: left;
-    color: var(--purple-light);
-    margin-bottom: 10px;
-    padding-left: 10px;
-    font-family: "TTNorms-bold";
-    font-weight: normal;
-    font-size: 28px;
-}
-
 
 th,
 td {
@@ -110,25 +88,20 @@ td {
     min-width: 80px;
 }
 
-
 @media (hover: hover) {
     .free:hover {
         background: var(--glass);
     }
 }
 
-
 th[colspan] {
     background: var(--glass);
 }
-
-
 
 td:first-child {
     font-weight: bold;
     width: 70px;
 }
-
 
 th:not(:first-child),
 td:not(:first-child) {
@@ -141,18 +114,12 @@ strong {
     color: var(--purple-light);
 }
 
-
 .cell-active,
 .cell-active:hover {
     box-shadow: inset 0 0 0 2px var(--purple-light);
     background-color: var(--glass);
     transition: background-color 0.2s ease, box-shadow 0.2s ease;
 }
-
-
-
-
-
 
 footer {
     width: 3374px;
@@ -163,7 +130,17 @@ footer {
 }
 
 
+.popup-date {
+    font-size: 17px;
+    margin-bottom: 4px;
+    color: var(--purple-light);
+}
 
+.popup-time {
+    font-size: 17px;
+    margin-bottom: 8px;
+    color: var(--purple-light);
+}
 
 
 
@@ -202,4 +179,112 @@ footer {
     footer {
         width: 3324px;
     }
+}
+
+.dark body {
+    background: var(--dark);
+}
+
+.dark header {
+    background: var(--dark);
+}
+
+
+.dark .calendar {
+    background: var(--dark);
+    border: 1px solid var(--light);
+}
+
+.dark .calendar p {
+    color: var(--light);
+}
+
+.dark table {
+    border-radius: 30px;
+    border-width: 1px;
+    border-style: solid;
+    border-color: var(--light);
+    overflow: hidden;
+    border-spacing: 0px;
+    text-align: center;
+}
+
+.dark td:first-child {
+    border-width: 1px 1px 0 0px;
+    border-style: solid;
+    border-color: var(--light);
+}
+
+.dark small {
+    color: var(--light);
+}
+
+.dark th,
+.dark td {
+    border: 1px solid #f7fcfc30;
+    padding: 8px;
+    min-width: 80px;
+}
+
+@media (hover: hover) {
+    .dark .free:hover {
+        background: #f7fcfc30;
+    }
+}
+
+.dark th[colspan] {
+    background: var(--dark);
+}
+
+.dark strong {
+    color: var(--light);
+}
+
+.dark .cell-active,
+.dark .cell-active:hover {
+    box-shadow: inset 0 0 0 2px var(--dark);
+    background-color: #f7fcfc30;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dark footer {
+    color: var(--light);
+    border-top: 1px solid #f7fcfc30;
+}
+
+.dark table tr th {
+    background: none !important;
+    color: var(--light) !important;
+}
+
+.dark th {
+    border-color: var(--light) !important;
+}
+
+.dark table tr td.time {
+    background: none !important;
+    color: var(--light) !important;
+}
+
+.dark #teacher-popup {
+    background: var(--dark) !important;
+    border: 1px solid var(--light);
+}
+
+.dark .popup-date {
+    color: var(--light);
+}
+
+.dark .popup-time {
+    color: var(--light);
+}
+
+.dark .cancelBtn {
+    background: var(--dark) !important;
+    color: #f7fcfc !important;
+}
+
+.dark .cancelBtn:hover {
+    background: #f7fcfc !important;
+    color: var(--dark) !important;
 }

@@ -27,10 +27,11 @@
     --white: #ffffff;
     --glass: #f2f0fa;
     --light: #f7fcfc;
+    --dark: #171717;
     --purple-light: #9526c0;
     --purple-dark: #5a205a;
     --gradient: linear-gradient(10deg, #5a205a 0%, #9526c0 100%);
-    --shadow: 0 6px 24px #0000000f;
+    --shadow: 0 5px 25px #17171710;
     --border: 1px solid var(--glass);
     --text15: 15px;
     --text18: 18px;

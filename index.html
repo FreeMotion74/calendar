@@ -5,9 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <link rel="icon" href="img/favicon.png">
+    <link rel="icon" href="img/icon-light.png">
     <link rel="apple-touch-icon" href="img/apple-icon.png">
-    <meta name="theme-color" content="#9526c0">
+    <meta name="theme-color" content="#171717">
     <title>FREE MOTION - Расписание</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="index.css">
@@ -24,6 +24,13 @@
             appId: "1:497955603175:web:54c6ce88d62b3072a6d842"
         };
         firebase.initializeApp(firebaseConfig);
+    </script>
+    <script>
+        const hour = new Date().getHours();
+        if (hour < 18) {
+            document.documentElement.classList.add('dark');
+            document.querySelector("link[rel='icon']").href = "img/icon-dark.png";
+        }
     </script>
 </head>
 
@@ -60,7 +67,7 @@
     </footer>
 
     <script src="mandatory.js"></script>
-    <script type="module" src="script.js?v=1.4"></script>
+    <script type="module" src="script.js?v=1.4.1"></script>
 
 </body>
 

@@ -11,10 +11,10 @@ const teachers = [
 
 const systemMandatory = [
     { name: 'Свободное время', color: '#2cafc0', editable: false },
-    { name: 'Закрыто', color: '#222222', editable: false }
+    { name: 'Закрыто', color: '#171717', editable: false }
 ];
 
-const occupiedColor = '#444444';
+const occupiedColor = '#aaaaaa';
 
 const times = ['10:00', '10:30', '11:00', '11:30', '12:00', '12:30', '13:00', '13:30', '14:00', '14:30', '15:00', '15:30', '16:00', '16:30', '17:00', '17:30', '18:00', '18:30', '19:00', '19:30', '20:00', '20:30', '21:00'];
 
@@ -230,10 +230,10 @@ async function onCellClick(td, hall, time, dayIndex) {
     // Содержимое (дата/время)
     const info = document.createElement('div');
     info.innerHTML = `
-    <div style="font-size:17px; margin-bottom:4px; color:#9526c0;">
+    <div class="popup-date">
       <strong>Дата:</strong> ${weekDates[dayIndex].dayStr}
     </div>
-    <div style="font-size:17px; margin-bottom:8px; color:#9526c0;">
+      <div class="popup-time">
       <strong>Время:</strong> ${time}
     </div>
   `;
@@ -276,6 +276,7 @@ async function onCellClick(td, hall, time, dayIndex) {
 
     // Кнопка отмены
     const cancelBtn = document.createElement('button');
+    cancelBtn.classList.add('cancelBtn');
     cancelBtn.textContent = 'Отмена';
     cancelBtn.style.display = 'block';
     cancelBtn.style.width = '100%';
@@ -414,6 +415,11 @@ function renderHall(hall, containerId) {
     dateTh.style.borderColor = '#9526c0';
     weekHeader.appendChild(dateTh);
 
+
+
+
+
+
     let start = 0;
     while (start < weekDates.length) {
         const startDay = weekDates[start].date;
@@ -469,6 +475,7 @@ function renderHall(hall, containerId) {
     times.forEach(time => {
         const tr = document.createElement('tr');
         const tdTime = document.createElement('td');
+        tdTime.classList.add('time');  // <-- для управления темной темой
         tdTime.textContent = time;
         tdTime.style.color = '#9526c0';
         tdTime.style.background = '#f2f0fa';
