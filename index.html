@@ -27,7 +27,7 @@
     </script>
     <script>
         const hour = new Date().getHours();
-        if (hour < 18) {
+        if (hour < 10) {
             document.documentElement.classList.add('dark');
             document.querySelector("link[rel='icon']").href = "img/icon-dark.png";
         }
@@ -70,5 +70,6 @@
     <script type="module" src="script.js?v=1.4.1"></script>
 
 </body>
+
 
 </html>
